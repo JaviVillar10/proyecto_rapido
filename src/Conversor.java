@@ -40,3 +40,22 @@ public class Conversor {
         System.out.println("Archivo seleccionado: " + (archivoSeleccionado != null ? archivoSeleccionado : "Ninguno"));
         listarContenidoCarpeta();
     }
+
+    private List<Coche> parsearCSV(File archivo) throws IOException {
+        List<Coche> coches = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            br.readLine();
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                Coche coche = new Coche();
+                coche.setMarca(datos[0]);
+                coche.setModelo(datos[1]);
+                coche.setAño(Integer.parseInt(datos[2]));
+                coche.setColor(datos[3]);
+                coche.setPrecio(Double.parseDouble(datos[4]));
+                coches.add(coche);
+            }
+        }
+        return coches;
+    }
