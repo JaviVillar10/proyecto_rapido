@@ -1,4 +1,3 @@
-// Archivo: Coche.java
 package conversor;
 public class Coche {
 private String marca;
@@ -6,7 +5,7 @@ private String modelo;
 private int año;
 private String color;
 private double precio;
-// Getters y Setters
+
 public String getMarca() { return marca; }
 public void setMarca(String marca) { this.marca = marca; }
 public String getModelo() { return modelo; }
