@@ -8,6 +8,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
 
+
 public class Conversor {
     private String rutaCarpeta;
     private List<Coche> coches = new ArrayList<>();
@@ -56,6 +57,44 @@ public class Conversor {
         listarContenidoCarpeta();
     }
 
+    private void leerArchivo(Scanner lector) {
+        if (rutaCarpeta == null) {
+            System.out.println("Primero seleccione una carpeta.");
+            return;
+        }
+        System.out.print("Nombre del archivo a leer: ");
+        String nombreArchivo = lector.nextLine();
+        File archivo = new File(rutaCarpeta + File.separator + nombreArchivo);
+
+        if (!archivo.exists()) {
+            System.out.println("¡Error! El archivo no existe.");
+            return;
+        }
+
+        coches.clear();
+        String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf(".") + 1).toLowerCase();
+        try {
+            switch (extension) {
+                case "csv":
+                    coches = parsearCSV(archivo);
+                    break;
+                case "json":
+                    coches = parsearJSON(archivo);
+                    break;
+                case "xml":
+                    coches = parsearXML(archivo);
+                    break;
+                default:
+                    System.out.println("Formato no soportado.");
+                    return;
+            }
+            archivoSeleccionado = nombreArchivo;
+            System.out.println("Archivo leído correctamente. Coches cargados: " + coches.size());
+        } catch (Exception e) {
+            System.out.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+
     private List<Coche> parsearCSV(File archivo) throws IOException {
         List<Coche> coches = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
@@ -74,7 +113,7 @@ public class Conversor {
         }
         return coches;
     }
-
+  
 private List<Coche> parsearXML(File archivo) throws Exception {
     List<Coche> coches = new ArrayList<>();
     DocumentBuilder constructor = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -92,3 +131,35 @@ private List<Coche> parsearXML(File archivo) throws Exception {
     }
     return coches;
 }
+  
+  
+    private void convertirArchivo(Scanner lector) {
+        if (coches.isEmpty()) {
+            System.out.println("No hay datos para convertir.");
+            return;
+        }
+        System.out.println("Formatos disponibles:");
+        System.out.println("1. CSV\n2. JSON\n3. XML");
+        int formato = obtenerEntero(lector, "Seleccione formato de salida: ");
+        lector.nextLine(); // Limpiar buffer
+        
+        System.out.print("Nombre del archivo de salida: ");
+        String nombreArchivo = lector.nextLine();
+        File archivoSalida = new File(rutaCarpeta + File.separator + nombreArchivo);
+        
+        try {
+            switch (formato) {
+                case 1: archivoSalida = asegurarExtension(archivoSalida, "csv");
+                        escribirCSV(archivoSalida); break;
+                case 2: archivoSalida = asegurarExtension(archivoSalida, "json");
+                        escribirJSON(archivoSalida); break;
+                case 3: archivoSalida = asegurarExtension(archivoSalida, "xml");
+                        escribirXML(archivoSalida); break;
+                default: System.out.println("Opción inválida."); return;
+            }
+            System.out.println("Archivo guardado en: " + archivoSalida.getAbsolutePath());
+        } catch (Exception e) {
+            System.out.println("Error durante la conversión: " + e.getMessage());
+        }
+    }
+
