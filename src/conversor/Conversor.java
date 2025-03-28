@@ -6,6 +6,35 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
 
+
+
+private void seleccionarCarpeta(Scanner lector) {
+    System.out.print("Ingrese la ruta de la carpeta: ");
+    String ruta = lector.nextLine();
+    File carpeta = new File(ruta);
+    if (carpeta.isDirectory()) {
+        rutaCarpeta = ruta;
+        System.out.println("Carpeta seleccionada: " + ruta);
+    } else {
+        System.out.println("¡Error! La ruta no es válida.");
+    }
+}
+
+private void listarContenidoCarpeta() {
+    if (rutaCarpeta == null) return;
+    File carpeta = new File(rutaCarpeta);
+    File[] archivos = carpeta.listFiles((dir, nombre) -> 
+        nombre.toLowerCase().matches(".*\\.(csv|json|xml)"));
+    System.out.println("\nArchivos disponibles:");
+    if (archivos != null && archivos.length > 0) {
+        for (File archivo : archivos) {
+            System.out.println("- " + archivo.getName());
+        }
+    } else {
+        System.out.println("No hay archivos compatibles.");
+    }
+}
+
 private List<Coche> parsearXML(File archivo) throws Exception {
     List<Coche> coches = new ArrayList<>();
     DocumentBuilder constructor = DocumentBuilderFactory.newInstance().newDocumentBuilder();
