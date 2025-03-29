@@ -60,6 +60,7 @@ public class Conversor {
                 lector.next();
             }
         }
+    }
 
     private void mostrarMenu() {
         System.out.println("\n=== Menú Principal ===");
@@ -182,6 +183,10 @@ public class Conversor {
         return coches;
     }
 
+    private String obtenerValorElemento(Element padre, String nombreEtiqueta) {
+        return padre.getElementsByTagName(nombreEtiqueta).item(0).getTextContent();
+    }
+
     private void convertirArchivo(Scanner lector) {
         if (coches.isEmpty()) {
             System.out.println("No hay datos para convertir.");
@@ -240,12 +245,27 @@ private void escribirXML(File archivoSalida) throws Exception {
     transformador.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
     transformador.transform(new DOMSource(documento), new StreamResult(archivoSalida));
 }
+
+private void crearElemento(Document documento, Element padre, String nombre, String valor) {
+    Element elemento = documento.createElement(nombre);
+    elemento.appendChild(documento.createTextNode(valor));
+    padre.appendChild(elemento);
+}
+
+private File asegurarExtension(File archivo, String extension) {
+    if (!archivo.getName().toLowerCase().endsWith("." + extension)) {
+        return new File(archivo.getAbsolutePath() + "." + extension);
+    }
+    return archivo;
+}
+
     private void escribirCSV(File archivoSalida) throws IOException {
         try (PrintWriter escritor = new PrintWriter(archivoSalida)) {
             escritor.println("Marca,Modelo,Año,Color,Precio");
             for (Coche coche : coches) {
                 escritor.printf("%s,%s,%d,%s,%.2f%n",
                         coche.getMarca(), coche.getModelo(), coche.getAño(), coche.getColor(), coche.getPrecio());
+            }
             }
         }
     }
@@ -256,3 +276,5 @@ private void escribirXML(File archivoSalida) throws Exception {
             gson.toJson(coches, escritor);
         }
     }
+
+
