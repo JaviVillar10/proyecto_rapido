@@ -1,3 +1,7 @@
+/**
+ * @author Adrián Herrera
+ * @author Javier Villar
+ */
 package conversor;
 
 import java.io.*;
@@ -45,6 +49,17 @@ public class Conversor {
         }
         lector.close();
     }
+
+    private int obtenerEntero(Scanner lector, String mensaje) {
+        while (true) {
+            try {
+                System.out.print(mensaje);
+                return lector.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("¡Error! Ingrese un número válido.");
+                lector.next();
+            }
+        }
 
     private void mostrarMenu() {
         System.out.println("\n=== Menú Principal ===");
