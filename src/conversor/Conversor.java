@@ -1,3 +1,7 @@
+/**
+ * @author Adrián Herrera
+ * @author Javier Villar
+ */
 package conversor;
 
 import java.io.*;
@@ -7,7 +11,8 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Conversor {
     private String rutaCarpeta;
@@ -45,6 +50,17 @@ public class Conversor {
         lector.close();
     }
 
+    private int obtenerEntero(Scanner lector, String mensaje) {
+        while (true) {
+            try {
+                System.out.print(mensaje);
+                return lector.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("¡Error! Ingrese un número válido.");
+                lector.next();
+            }
+        }
+
     private void mostrarMenu() {
         System.out.println("\n=== Menú Principal ===");
         System.out.println("1. Seleccionar carpeta");
@@ -57,33 +73,33 @@ public class Conversor {
         listarContenidoCarpeta();
     }
 
-private void seleccionarCarpeta(Scanner lector) {
-    System.out.print("Ingrese la ruta de la carpeta: ");
-    String ruta = lector.nextLine();
-    File carpeta = new File(ruta);
-    if (carpeta.isDirectory()) {
-        rutaCarpeta = ruta;
-        System.out.println("Carpeta seleccionada: " + ruta);
-    } else {
-        System.out.println("¡Error! La ruta no es válida.");
-    }
-}
-
-private void listarContenidoCarpeta() {
-    if (rutaCarpeta == null) return;
-    File carpeta = new File(rutaCarpeta);
-    File[] archivos = carpeta.listFiles((dir, nombre) -> 
-        nombre.toLowerCase().matches(".*\\.(csv|json|xml)"));
-    System.out.println("\nArchivos disponibles:");
-    if (archivos != null && archivos.length > 0) {
-        for (File archivo : archivos) {
-            System.out.println("- " + archivo.getName());
+    private void seleccionarCarpeta(Scanner lector) {
+        System.out.print("Ingrese la ruta de la carpeta: ");
+        String ruta = lector.nextLine();
+        File carpeta = new File(ruta);
+        if (carpeta.isDirectory()) {
+            rutaCarpeta = ruta;
+            System.out.println("Carpeta seleccionada: " + ruta);
+        } else {
+            System.out.println("¡Error! La ruta no es válida.");
         }
-    } else {
-        System.out.println("No hay archivos compatibles.");
     }
-}
-  
+
+    private void listarContenidoCarpeta() {
+        if (rutaCarpeta == null)
+            return;
+        File carpeta = new File(rutaCarpeta);
+        File[] archivos = carpeta.listFiles((dir, nombre) -> nombre.toLowerCase().matches(".*\\.(csv|json|xml)"));
+        System.out.println("\nArchivos disponibles:");
+        if (archivos != null && archivos.length > 0) {
+            for (File archivo : archivos) {
+                System.out.println("- " + archivo.getName());
+            }
+        } else {
+            System.out.println("No hay archivos compatibles.");
+        }
+    }
+
     private void leerArchivo(Scanner lector) {
         if (rutaCarpeta == null) {
             System.out.println("Primero seleccione una carpeta.");
@@ -140,26 +156,32 @@ private void listarContenidoCarpeta() {
         }
         return coches;
     }
-  
-private List<Coche> parsearXML(File archivo) throws Exception {
-    List<Coche> coches = new ArrayList<>();
-    DocumentBuilder constructor = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    Document documento = constructor.parse(archivo);
-    NodeList nodos = documento.getElementsByTagName("coche");
-    for (int i = 0; i < nodos.getLength(); i++) {
-        Element elemento = (Element) nodos.item(i);
-        Coche coche = new Coche();
-        coche.setMarca(obtenerValorElemento(elemento, "Marca"));
-        coche.setModelo(obtenerValorElemento(elemento, "Modelo"));
-        coche.setAño(Integer.parseInt(obtenerValorElemento(elemento, "Año")));
-        coche.setColor(obtenerValorElemento(elemento, "Color"));
-        coche.setPrecio(Double.parseDouble(obtenerValorElemento(elemento, "Precio")));
-        coches.add(coche);
+
+    private List<Coche> parsearJSON(File archivo) throws IOException {
+        Gson gson = new Gson();
+        try (Reader reader = new FileReader(archivo)) {
+            return Arrays.asList(gson.fromJson(reader, Coche[].class));
+        }
     }
-    return coches;
-}
-  
-  
+
+    private List<Coche> parsearXML(File archivo) throws Exception {
+        List<Coche> coches = new ArrayList<>();
+        DocumentBuilder constructor = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document documento = constructor.parse(archivo);
+        NodeList nodos = documento.getElementsByTagName("coche");
+        for (int i = 0; i < nodos.getLength(); i++) {
+            Element elemento = (Element) nodos.item(i);
+            Coche coche = new Coche();
+            coche.setMarca(obtenerValorElemento(elemento, "Marca"));
+            coche.setModelo(obtenerValorElemento(elemento, "Modelo"));
+            coche.setAño(Integer.parseInt(obtenerValorElemento(elemento, "Año")));
+            coche.setColor(obtenerValorElemento(elemento, "Color"));
+            coche.setPrecio(Double.parseDouble(obtenerValorElemento(elemento, "Precio")));
+            coches.add(coche);
+        }
+        return coches;
+    }
+
     private void convertirArchivo(Scanner lector) {
         if (coches.isEmpty()) {
             System.out.println("No hay datos para convertir.");
@@ -169,20 +191,28 @@ private List<Coche> parsearXML(File archivo) throws Exception {
         System.out.println("1. CSV\n2. JSON\n3. XML");
         int formato = obtenerEntero(lector, "Seleccione formato de salida: ");
         lector.nextLine(); // Limpiar buffer
-        
+
         System.out.print("Nombre del archivo de salida: ");
         String nombreArchivo = lector.nextLine();
         File archivoSalida = new File(rutaCarpeta + File.separator + nombreArchivo);
-        
+
         try {
             switch (formato) {
-                case 1: archivoSalida = asegurarExtension(archivoSalida, "csv");
-                        escribirCSV(archivoSalida); break;
-                case 2: archivoSalida = asegurarExtension(archivoSalida, "json");
-                        escribirJSON(archivoSalida); break;
-                case 3: archivoSalida = asegurarExtension(archivoSalida, "xml");
-                        escribirXML(archivoSalida); break;
-                default: System.out.println("Opción inválida."); return;
+                case 1:
+                    archivoSalida = asegurarExtension(archivoSalida, "csv");
+                    escribirCSV(archivoSalida);
+                    break;
+                case 2:
+                    archivoSalida = asegurarExtension(archivoSalida, "json");
+                    escribirJSON(archivoSalida);
+                    break;
+                case 3:
+                    archivoSalida = asegurarExtension(archivoSalida, "xml");
+                    escribirXML(archivoSalida);
+                    break;
+                default:
+                    System.out.println("Opción inválida.");
+                    return;
             }
             System.out.println("Archivo guardado en: " + archivoSalida.getAbsolutePath());
         } catch (Exception e) {
@@ -210,3 +240,19 @@ private void escribirXML(File archivoSalida) throws Exception {
     transformador.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
     transformador.transform(new DOMSource(documento), new StreamResult(archivoSalida));
 }
+    private void escribirCSV(File archivoSalida) throws IOException {
+        try (PrintWriter escritor = new PrintWriter(archivoSalida)) {
+            escritor.println("Marca,Modelo,Año,Color,Precio");
+            for (Coche coche : coches) {
+                escritor.printf("%s,%s,%d,%s,%.2f%n",
+                        coche.getMarca(), coche.getModelo(), coche.getAño(), coche.getColor(), coche.getPrecio());
+            }
+        }
+    }
+
+    private void escribirJSON(File archivoSalida) throws IOException {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter escritor = new FileWriter(archivoSalida)) {
+            gson.toJson(coches, escritor);
+        }
+    }

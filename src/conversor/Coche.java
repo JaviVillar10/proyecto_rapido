@@ -1,3 +1,7 @@
+/**
+ * @author Adrián Herrera
+ * @author Javier Villar
+ */
 package conversor;
 public class Coche {
 private String marca;
