@@ -53,3 +53,23 @@ private List<Coche> parsearXML(File archivo) throws Exception {
     return coches;
 }
 
+private void escribirXML(File archivoSalida) throws Exception {
+    Document documento = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    Element raiz = documento.createElement("coches");
+    documento.appendChild(raiz);
+    
+    for (Coche coche : coches) {
+        Element elementoCoche = documento.createElement("coche");
+        crearElemento(documento, elementoCoche, "Marca", coche.getMarca());
+        crearElemento(documento, elementoCoche, "Modelo", coche.getModelo());
+        crearElemento(documento, elementoCoche, "Año", String.valueOf(coche.getAño()));
+        crearElemento(documento, elementoCoche, "Color", coche.getColor());
+        crearElemento(documento, elementoCoche, "Precio", String.format("%.2f", coche.getPrecio()));
+        raiz.appendChild(elementoCoche);
+    }
+    
+    Transformer transformador = TransformerFactory.newInstance().newTransformer();
+    transformador.setOutputProperty(OutputKeys.INDENT, "yes");
+    transformador.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+    transformador.transform(new DOMSource(documento), new StreamResult(archivoSalida));
+}
