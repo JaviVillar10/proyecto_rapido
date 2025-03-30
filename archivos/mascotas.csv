@@ -1,0 +1,21 @@
+id_mascota,nombre,especie,raza,fecha_nacimiento,id_dueño
+1,Mascota 1,Ave,Raza 4,2016-12-06,6
+2,Mascota 2,Gato,Raza 7,2010-06-13,4
+3,Mascota 3,Gato,Raza 2,2016-09-01,15
+4,Mascota 4,Perro,Raza 2,2016-12-15,1
+5,Mascota 5,Ave,Raza 6,2019-10-28,8
+6,Mascota 6,Ave,Raza 5,2020-08-08,10
+7,Mascota 7,Ave,Raza 7,2021-09-09,5
+8,Mascota 8,Gato,Raza 5,2013-12-03,5
+9,Mascota 9,Ave,Raza 2,2016-02-02,1
+10,Mascota 10,Ave,Raza 2,2010-02-07,11
+11,Mascota 11,Reptil,Raza 3,2022-06-18,10
+12,Mascota 12,Perro,Raza 8,2017-01-23,5
+13,Mascota 13,Ave,Raza 2,2020-06-13,1
+14,Mascota 14,Reptil,Raza 5,2013-02-03,4
+15,Mascota 15,Gato,Raza 8,2014-08-03,3
+16,Mascota 16,Ave,Raza 3,2014-09-06,6
+17,Mascota 17,Perro,Raza 4,2018-05-15,5
+18,Mascota 18,Ave,Raza 4,2012-10-03,1
+19,Mascota 19,Reptil,Raza 9,2022-03-25,4
+20,Mascota 20,Ave,Raza 9,2015-01-21,7
