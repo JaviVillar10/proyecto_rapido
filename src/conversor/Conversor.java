@@ -226,19 +226,15 @@ public class Conversor {
         return resultado;
     }
 
-    private String obtenerValorElemento(Element padre, String nombreEtiqueta) {
-        return padre.getElementsByTagName(nombreEtiqueta).item(0).getTextContent();
-    }
-
     private void convertirArchivo(Scanner lector) {
-        if (coches.isEmpty()) {
+        if (datos.isEmpty()) {
             System.out.println("No hay datos para convertir.");
             return;
         }
         System.out.println("Formatos disponibles:");
         System.out.println("1. CSV\n2. JSON\n3. XML");
         int formato = obtenerEntero(lector, "Seleccione formato de salida: ");
-        lector.nextLine(); // Limpiar buffer
+        lector.nextLine(); 
 
         System.out.print("Nombre del archivo de salida: ");
         String nombreArchivo = lector.nextLine();
@@ -265,6 +261,36 @@ public class Conversor {
             System.out.println("Archivo guardado en: " + archivoSalida.getAbsolutePath());
         } catch (Exception e) {
             System.out.println("Error durante la conversión: " + e.getMessage());
+        }
+    }
+
+    private void escribirCSV(File archivoSalida) throws IOException {
+        try (PrintWriter escritor = new PrintWriter(archivoSalida)) {
+            escritor.println(String.join(",", cabeceras));
+            
+            for (Map<String, Object> registro : datos) {
+                StringBuilder linea = new StringBuilder();
+                
+                for (int i = 0; i < cabeceras.size(); i++) {
+                    if (i > 0) {
+                        linea.append(",");
+                    }
+                    
+                    Object valor = registro.get(cabeceras.get(i));
+                    if (valor != null) {
+                        linea.append(valor);
+                    }
+                }
+                
+                escritor.println(linea);
+            }
+        }
+    }
+
+    private void escribirJSON(File archivoSalida) throws IOException {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter escritor = new FileWriter(archivoSalida)) {
+            gson.toJson(datos, escritor);
         }
     }
 
@@ -302,21 +328,4 @@ public class Conversor {
         return archivo;
     }
 
-    private void escribirCSV(File archivoSalida) throws IOException {
-        try (PrintWriter escritor = new PrintWriter(archivoSalida)) {
-            escritor.println("Marca,Modelo,Año,Color,Precio");
-            for (Coche coche : coches) {
-                escritor.printf("%s,%s,%d,%s,%.2f%n",
-                        coche.getMarca(), coche.getModelo(), coche.getAño(), coche.getColor(), coche.getPrecio());
-            }
-        }
-    }
-
-    }
-
-    private void escribirJSON(File archivoSalida) throws IOException {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try (FileWriter escritor = new FileWriter(archivoSalida)) {
-            gson.toJson(coches, escritor);
-        }
-    }
+}
