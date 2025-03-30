@@ -165,22 +165,50 @@ public class Conversor {
         }
     }
 
-    private List<Coche> parsearXML(File archivo) throws Exception {
-        List<Coche> coches = new ArrayList<>();
+    private List<Map<String, Object>> parsearXML(File archivo) throws Exception {
+        List<Map<String, Object>> resultado = new ArrayList<>();
         DocumentBuilder constructor = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document documento = constructor.parse(archivo);
-        NodeList nodos = documento.getElementsByTagName("coche");
+        
+        Element raiz = documento.getDocumentElement();
+        NodeList nodos = raiz.getChildNodes();
+        
+        
+        Set<String> todasCabeceras = new HashSet<>();
         for (int i = 0; i < nodos.getLength(); i++) {
-            Element elemento = (Element) nodos.item(i);
-            Coche coche = new Coche();
-            coche.setMarca(obtenerValorElemento(elemento, "Marca"));
-            coche.setModelo(obtenerValorElemento(elemento, "Modelo"));
-            coche.setAño(Integer.parseInt(obtenerValorElemento(elemento, "Año")));
-            coche.setColor(obtenerValorElemento(elemento, "Color"));
-            coche.setPrecio(Double.parseDouble(obtenerValorElemento(elemento, "Precio")));
-            coches.add(coche);
+            if (nodos.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element elemento = (Element) nodos.item(i);
+                NodeList propiedades = elemento.getChildNodes();
+                
+                for (int j = 0; j < propiedades.getLength(); j++) {
+                    if (propiedades.item(j).getNodeType() == Node.ELEMENT_NODE) {
+                        todasCabeceras.add(propiedades.item(j).getNodeName());
+                    }
+                }
+            }
         }
-        return coches;
+        cabeceras.addAll(todasCabeceras);
+        
+        
+        for (int i = 0; i < nodos.getLength(); i++) {
+            if (nodos.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                Element elemento = (Element) nodos.item(i);
+                Map<String, Object> registro = new HashMap<>();
+                
+                for (String cabecera : cabeceras) {
+                    NodeList elementos = elemento.getElementsByTagName(cabecera);
+                    if (elementos.getLength() > 0) {
+                        registro.put(cabecera, elementos.item(0).getTextContent());
+                    }
+                }
+                
+                if (!registro.isEmpty()) {
+                    resultado.add(registro);
+                }
+            }
+        }
+        
+        return resultado;
     }
 
     private String obtenerValorElemento(Element padre, String nombreEtiqueta) {
