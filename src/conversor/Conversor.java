@@ -13,11 +13,13 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 public class Conversor {
     private String rutaCarpeta;
-    private List<Coche> coches = new ArrayList<>();
+    private List<Map<String, Object>> datos = new ArrayList<>();
     private String archivoSeleccionado;
+    private List<String> cabeceras = new ArrayList<>();
 
     public static void main(String[] args) {
         new Conversor().ejecutar();
