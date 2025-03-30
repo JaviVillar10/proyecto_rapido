@@ -1,0 +1,21 @@
+id_tratamiento,id_mascota,descripcion,fecha_inicio,fecha_fin
+1,18,Analgésico,2024-08-19,2024-07-19
+2,8,Gotas oculares,2024-03-25,2024-10-26
+3,4,Antibiótico,2024-11-16,2024-05-22
+4,5,Antibiótico,2024-11-27,2024-07-28
+5,15,Gotas oculares,2024-12-12,2024-05-17
+6,18,Analgésico,2024-07-17,2024-04-20
+7,18,Analgésico,2024-11-04,2024-06-11
+8,18,Gotas oculares,2024-12-15,2024-04-14
+9,18,Antibiótico,2024-08-23,2024-05-03
+10,10,Antibiótico,2024-06-03,2024-11-06
+11,3,Antibiótico,2024-01-14,2024-09-03
+12,18,Antibiótico,2024-04-28,2024-01-12
+13,2,Gotas oculares,2024-06-02,2024-09-27
+14,14,Antibiótico,2024-11-16,2024-01-17
+15,14,Gotas oculares,2024-05-21,2024-02-20
+16,10,Antibiótico,2024-01-14,2024-10-16
+17,16,Gotas oculares,2024-01-03,2024-11-03
+18,1,Suplemento,2024-03-11,2024-11-03
+19,2,Suplemento,2024-03-20,2024-03-04
+20,7,Suplemento,2024-03-02,2024-08-10
