@@ -139,29 +139,43 @@ public class Conversor {
         }
     }
 
-    private List<Coche> parsearCSV(File archivo) throws IOException {
-        List<Coche> coches = new ArrayList<>();
+    private List<Map<String, Object>> parsearCSV(File archivo) throws IOException {
+        List<Map<String, Object>> resultado = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            br.readLine();
+            String lineaCabecera = br.readLine();
+            if (lineaCabecera == null) {
+                throw new IOException("El archivo CSV está vacío");
+            }
+
+            String[] headers = lineaCabecera.split(",");
+            cabeceras.addAll(Arrays.asList(headers));
+
             String linea;
             while ((linea = br.readLine()) != null) {
-                String[] datos = linea.split(",");
-                Coche coche = new Coche();
-                coche.setMarca(datos[0]);
-                coche.setModelo(datos[1]);
-                coche.setAño(Integer.parseInt(datos[2]));
-                coche.setColor(datos[3]);
-                coche.setPrecio(Double.parseDouble(datos[4]));
-                coches.add(coche);
+                String[] valores = linea.split(",");
+                Map<String, Object> registro = new HashMap<>();
+
+                for (int i = 0; i < headers.length && i < valores.length; i++) {
+                    registro.put(headers[i], valores[i]);
+                }
+                resultado.add(registro);
             }
         }
-        return coches;
+        return resultado;
     }
 
-    private List<Coche> parsearJSON(File archivo) throws IOException {
+    private List<Map<String, Object>> parsearJSON(File archivo) throws IOException {
         Gson gson = new Gson();
         try (Reader reader = new FileReader(archivo)) {
-            return Arrays.asList(gson.fromJson(reader, Coche[].class));
+            List<Map<String, Object>> resultado = gson.fromJson(reader,
+                    new TypeToken<List<Map<String, Object>>>() {
+                    }.getType());
+
+            if (!resultado.isEmpty()) {
+                cabeceras.addAll(resultado.get(0).keySet());
+            }
+
+            return resultado;
         }
     }
 
@@ -169,17 +183,16 @@ public class Conversor {
         List<Map<String, Object>> resultado = new ArrayList<>();
         DocumentBuilder constructor = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document documento = constructor.parse(archivo);
-        
+
         Element raiz = documento.getDocumentElement();
         NodeList nodos = raiz.getChildNodes();
-        
-        
+
         Set<String> todasCabeceras = new HashSet<>();
         for (int i = 0; i < nodos.getLength(); i++) {
             if (nodos.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element elemento = (Element) nodos.item(i);
                 NodeList propiedades = elemento.getChildNodes();
-                
+
                 for (int j = 0; j < propiedades.getLength(); j++) {
                     if (propiedades.item(j).getNodeType() == Node.ELEMENT_NODE) {
                         todasCabeceras.add(propiedades.item(j).getNodeName());
@@ -188,26 +201,25 @@ public class Conversor {
             }
         }
         cabeceras.addAll(todasCabeceras);
-        
-        
+
         for (int i = 0; i < nodos.getLength(); i++) {
             if (nodos.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 Element elemento = (Element) nodos.item(i);
                 Map<String, Object> registro = new HashMap<>();
-                
+
                 for (String cabecera : cabeceras) {
                     NodeList elementos = elemento.getElementsByTagName(cabecera);
                     if (elementos.getLength() > 0) {
                         registro.put(cabecera, elementos.item(0).getTextContent());
                     }
                 }
-                
+
                 if (!registro.isEmpty()) {
                     resultado.add(registro);
                 }
             }
         }
-        
+
         return resultado;
     }
 
@@ -253,39 +265,39 @@ public class Conversor {
         }
     }
 
-private void escribirXML(File archivoSalida) throws Exception {
-    Document documento = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-    Element raiz = documento.createElement("coches");
-    documento.appendChild(raiz);
-    
-    for (Coche coche : coches) {
-        Element elementoCoche = documento.createElement("coche");
-        crearElemento(documento, elementoCoche, "Marca", coche.getMarca());
-        crearElemento(documento, elementoCoche, "Modelo", coche.getModelo());
-        crearElemento(documento, elementoCoche, "Año", String.valueOf(coche.getAño()));
-        crearElemento(documento, elementoCoche, "Color", coche.getColor());
-        crearElemento(documento, elementoCoche, "Precio", String.format("%.2f", coche.getPrecio()));
-        raiz.appendChild(elementoCoche);
-    }
-    
-    Transformer transformador = TransformerFactory.newInstance().newTransformer();
-    transformador.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformador.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-    transformador.transform(new DOMSource(documento), new StreamResult(archivoSalida));
-}
+    private void escribirXML(File archivoSalida) throws Exception {
+        Document documento = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        Element raiz = documento.createElement("coches");
+        documento.appendChild(raiz);
 
-private void crearElemento(Document documento, Element padre, String nombre, String valor) {
-    Element elemento = documento.createElement(nombre);
-    elemento.appendChild(documento.createTextNode(valor));
-    padre.appendChild(elemento);
-}
+        for (Coche coche : coches) {
+            Element elementoCoche = documento.createElement("coche");
+            crearElemento(documento, elementoCoche, "Marca", coche.getMarca());
+            crearElemento(documento, elementoCoche, "Modelo", coche.getModelo());
+            crearElemento(documento, elementoCoche, "Año", String.valueOf(coche.getAño()));
+            crearElemento(documento, elementoCoche, "Color", coche.getColor());
+            crearElemento(documento, elementoCoche, "Precio", String.format("%.2f", coche.getPrecio()));
+            raiz.appendChild(elementoCoche);
+        }
 
-private File asegurarExtension(File archivo, String extension) {
-    if (!archivo.getName().toLowerCase().endsWith("." + extension)) {
-        return new File(archivo.getAbsolutePath() + "." + extension);
+        Transformer transformador = TransformerFactory.newInstance().newTransformer();
+        transformador.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformador.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformador.transform(new DOMSource(documento), new StreamResult(archivoSalida));
     }
-    return archivo;
-}
+
+    private void crearElemento(Document documento, Element padre, String nombre, String valor) {
+        Element elemento = documento.createElement(nombre);
+        elemento.appendChild(documento.createTextNode(valor));
+        padre.appendChild(elemento);
+    }
+
+    private File asegurarExtension(File archivo, String extension) {
+        if (!archivo.getName().toLowerCase().endsWith("." + extension)) {
+            return new File(archivo.getAbsolutePath() + "." + extension);
+        }
+        return archivo;
+    }
 
     private void escribirCSV(File archivoSalida) throws IOException {
         try (PrintWriter escritor = new PrintWriter(archivoSalida)) {
@@ -294,8 +306,9 @@ private File asegurarExtension(File archivo, String extension) {
                 escritor.printf("%s,%s,%d,%s,%.2f%n",
                         coche.getMarca(), coche.getModelo(), coche.getAño(), coche.getColor(), coche.getPrecio());
             }
-            }
         }
+    }
+
     }
 
     private void escribirJSON(File archivoSalida) throws IOException {
@@ -304,5 +317,3 @@ private File asegurarExtension(File archivo, String extension) {
             gson.toJson(coches, escritor);
         }
     }
-
-
