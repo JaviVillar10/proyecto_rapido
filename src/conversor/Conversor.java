@@ -92,7 +92,7 @@ public class Conversor {
         if (rutaCarpeta == null)
             return;
         File carpeta = new File(rutaCarpeta);
-        File[] archivos = carpeta.listFiles((dir, nombre) -> nombre.toLowerCase().matches(".*\\.(csv|json|xml)"));
+        File[] archivos = carpeta.listFiles((_, nombre) -> nombre.toLowerCase().matches(".*\\.(csv|json|xml)"));
         System.out.println("\nArchivos disponibles:");
         if (archivos != null && archivos.length > 0) {
             for (File archivo : archivos) {
