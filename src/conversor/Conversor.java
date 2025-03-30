@@ -117,25 +117,26 @@ public class Conversor {
             return;
         }
 
-        coches.clear();
+        datos.clear();
+        cabeceras.clear();
         String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf(".") + 1).toLowerCase();
         try {
             switch (extension) {
                 case "csv":
-                    coches = parsearCSV(archivo);
+                    datos = parsearCSV(archivo);
                     break;
                 case "json":
-                    coches = parsearJSON(archivo);
+                    datos = parsearJSON(archivo);
                     break;
                 case "xml":
-                    coches = parsearXML(archivo);
+                    datos = parsearXML(archivo);
                     break;
                 default:
                     System.out.println("Formato no soportado.");
                     return;
             }
             archivoSeleccionado = nombreArchivo;
-            System.out.println("Archivo leído correctamente. Coches cargados: " + coches.size());
+            System.out.println("Archivo leído correctamente. Registros cargados: " + datos.size());
         } catch (Exception e) {
             System.out.println("Error al leer el archivo: " + e.getMessage());
         }
