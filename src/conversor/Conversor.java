@@ -296,17 +296,19 @@ public class Conversor {
 
     private void escribirXML(File archivoSalida) throws Exception {
         Document documento = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        Element raiz = documento.createElement("coches");
+        Element raiz = documento.createElement("datos");
         documento.appendChild(raiz);
 
-        for (Coche coche : coches) {
-            Element elementoCoche = documento.createElement("coche");
-            crearElemento(documento, elementoCoche, "Marca", coche.getMarca());
-            crearElemento(documento, elementoCoche, "Modelo", coche.getModelo());
-            crearElemento(documento, elementoCoche, "Año", String.valueOf(coche.getAño()));
-            crearElemento(documento, elementoCoche, "Color", coche.getColor());
-            crearElemento(documento, elementoCoche, "Precio", String.format("%.2f", coche.getPrecio()));
-            raiz.appendChild(elementoCoche);
+        for (Map<String, Object> registro : datos) {
+            Element elementoRegistro = documento.createElement("registro");
+            
+            for (Map.Entry<String, Object> entrada : registro.entrySet()) {
+                if (entrada.getValue() != null) {
+                    crearElemento(documento, elementoRegistro, entrada.getKey(), entrada.getValue().toString());
+                }
+            }
+            
+            raiz.appendChild(elementoRegistro);
         }
 
         Transformer transformador = TransformerFactory.newInstance().newTransformer();
