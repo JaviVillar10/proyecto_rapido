@@ -117,6 +117,8 @@ public class Conversor {
             return;
         }
 
+        cghcvghv
+
         datos.clear();
         cabeceras.clear();
         String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf(".") + 1).toLowerCase();
